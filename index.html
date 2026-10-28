@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VerificaLocal — Protótipo do Ideiathon</title>
+    <style>
+        /* ==================== VARIAVEIS E PALETA DE CORES ==================== */
+        :root {
+            --bg-main: #0B1220;
+            --bg-secondary: #0F172A;
+            --card-bg: #111C30;
+            --elevated: #18263D;
+            --border-color: #26364F;
+            --brand-primary: #1D4ED8;
+            --brand-accent: #3B82F6;
+            --brand-light: #93C5FD;
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --status-green: #22C55E;
+            --status-amber: #F59E0B;
+            --status-red: #EF4444;
+            
+            --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ==================== RESETS & BASICS ==================== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar Personalizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-accent);
+        }
+
+        /* ==================== TIPOGRAFIA & ICONES ==================== */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .svg-icon {
+            display: inline-block;
+            width: 1.125rem;
+            height: 1.125rem;
+            vertical-align: middle;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            shrink: 0;
+        }
+
+        /* ==================== BUTTONS & BADGES ==================== */
+        .btn {
+            display: inline-flex;
+            items-center: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.25rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background-color: var(--brand-primary);
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background-color: #1e40af;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: var(--elevated);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+            color: #ffffff;
+        }
+
+        .btn-success {
+            background-color: var(--status-green);
+            color: #ffffff;
+        }
+        .btn-success:hover {
+            background-color: #16a34a;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.85rem;
+            font-size: 0.75rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: var(--radius-full);
+            font-size: 0.725rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+            width: fit-content;
+        }
+        .badge-amber {
+            background-color: rgba(245, 158, 11, 0.12);
+            color: var(--status-amber);
+            border-color: rgba(245, 158, 11, 0.25);
+        }
+        .badge-green {
+            background-color: rgba(34, 197, 94, 0.12);
+            color: var(--status-green);
+            border-color: rgba(34, 197, 94, 0.25);
+        }
+        .badge-blue {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: var(--brand-light);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        /* ==================== LAYOUT CONTAINER ==================== */
+        .container {
+            width: 100%;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 1.25rem;
+        }
+
+        /* ==================== HEADER & NAV ==================== */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background-color: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border-color);
+            height: 68px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background-color: var(--brand-primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(29, 78, 216, 0.3);
+        }
+
+        .logo-text {
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        .logo-text span {
+            color: var(--brand-accent);
+        }
+
+        .logo-sub {
+            font-size: 0.6rem;
+            color: var(--brand-light);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: -3px;
+            display: block;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.5rem 0.85rem;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .nav-btn:hover {
+            color: var(--text-primary);
+            background-color: rgba(24, 38, 61, 0.5);
+        }
+
+        .nav-btn.active {
+            color: var(--brand-accent);
+            background-color: var(--elevated);
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* ==================== SCREEN TRANSITIONS ==================== */
+        .screen-section {
+            display: none;
+            animation: fadeIn 0.25s ease-in-out forwards;
+            padding: 2rem 0;
+        }
+
+        .screen-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ==================== TELA 1: LANDING PAGE ==================== */
+        .hero-banner {
+            position: relative;
+            background: linear-gradient(180deg, rgba(24, 38, 61, 0.6) 0%, rgba(17, 28, 48, 0.8) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 3rem 2.5rem;
+            overflow: hidden;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            right: -60px;
+            bottom: -60px;
+            width: 320px;
+            height: 320px;
+            background: radial-gradient(circle, rgba(29, 78, 216, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 720px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            letter-spacing: -0.03em;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .hero-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.85rem;
+            padding-top: 0.5rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .benefit-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .benefit-card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .benefit-icon {
+            width: 44px;
+            height: 44px;
+            background-color: rgba(29, 78, 216, 0.18);
+            color: var(--brand-accent);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+        }
+
+        .cta-banner {
+            background: linear-gradient(135deg, var(--card-bg) 0%, var(--elevated) 50%, var(--card-bg) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2.5rem;
+        }
+
+        /* ==================== TELA 2: LISTA DE OCORRENCIAS ==================== */
+        .filter-box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .search-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 0.65rem 1rem 0.65rem 2.75rem;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-family: inherit;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--brand-accent);
+        }
+
+        .filter-tags {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            border-top: 1px solid rgba(38, 54, 79, 0.6);
+            padding-top: 0.85rem;
+        }
+
+        .filter-tag {
+            background-color: var(--elevated);
+            color: var(--text-secondary);
+            border: none;
+            padding: 0.35rem 0.85rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-tag:hover {
+            color: var(--text-primary);
+            background-color: var(--border-color);
+        }
+
+        .filter-tag.active {
+            background-color: var(--brand-primary);
+            color: #ffffff;
+        }
+
+        .occurrence-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1rem;
+            transition: var(--transition);
+        }
+
+        .occurrence-card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .occurrence-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .occurrence-footer {
+            border-top: 1px solid rgba(38, 54, 79, 0.6);
+            padding-top: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* ==================== TELA 3: DETALHES DA OCORRÊNCIA ==================== */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .breadcrumb button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: inherit;
+        }
+
+        .breadcrumb button:hover {
+            color: var(--brand-accent);
+        }
+
+        .details-header-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .ai-card {
+            background: linear-gradient(135deg, var(--elevated) 0%, var(--card-bg) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .ai-icon-box {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            background-color: rgba(29, 78, 216, 0.25);
+            color: var(--brand-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .evidence-item {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 4px;
+            bottom: 4px;
+            width: 2px;
+            background-color: var(--border-color);
+        }
+
+        .timeline-step {
+            position: relative;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -1.5rem;
+            top: 3px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background-color: var(--brand-primary);
+            border: 2px solid var(--card-bg);
+        }
+
+        .timeline-dot.active {
+            background-color: var(--status-amber);
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+        }
+
+        .timeline-dot.success {
+            background-color: var(--status-green);
+        }
+
+        /* ==================== TELA 4: PAINEL EMPRESARIAL ==================== */
+        .dashboard-header {
+            background: linear-gradient(90deg, var(--card-bg) 0%, var(--elevated) 50%, var(--card-bg) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .kpi-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .alert-banner {
+            background-color: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            display: flex;
+            gap: 0.85rem;
+            align-items: flex-start;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .task-item {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 0.85rem 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .task-item:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .task-checkbox {
+            margin-top: 3px;
+            width: 16px;
+            height: 16px;
+            accent-color: var(--brand-primary);
+            cursor: pointer;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background-color: var(--bg-secondary);
+            border-radius: var(--radius-full);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--brand-accent);
+            width: 66%;
+            transition: width 0.3s ease;
+        }
+
+        .editor-textarea {
+            width: 100%;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.825rem;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 110px;
+            outline: none;
+        }
+
+        .editor-textarea:focus {
+            border-color: var(--brand-accent);
+        }
+
+        /* ==================== MODAL & TOAST ==================== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 520px;
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.85rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 60;
+            background-color: var(--elevated);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            border-radius: var(--radius-md);
+            padding: 0.85rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: var(--shadow-md);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* ==================== FOOTER ==================== */
+        .footer {
+            background-color: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem 0;
+            margin-top: 3rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .footer-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 868px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+            .nav-menu {
+                display: none; /* Simplificado para prototipo */
+            }
+            .hero-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER SUPERIOR -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <!-- Logo -->
+                <div class="brand-logo" onclick="navigateTo('home')">
+                    <div class="logo-icon">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                    </div>
+                    <div>
+                        <div class="logo-text">Verifica<span>Local</span></div>
+                        <span class="logo-sub">Combate à Desinformação</span>
+                    </div>
+                </div>
+
+                <!-- Menu de Navegação -->
+                <nav class="nav-menu">
+                    <button id="nav-home" class="nav-btn active" onclick="navigateTo('home')">Início</button>
+                    <button id="nav-occurrences" class="nav-btn" onclick="navigateTo('occurrences')">Ocorrências</button>
+                    <button id="nav-business" class="nav-btn" onclick="navigateTo('business')">Para Empresas</button>
+                </nav>
+
+                <!-- Ações Rápidas -->
+                <div class="header-actions">
+                    <button onclick="openModal()" class="btn btn-secondary btn-sm">
+                        <span>Registrar Ocorrência</span>
+                    </button>
+                    <button onclick="navigateTo('business')" class="btn btn-primary btn-sm">
+                        <span>Área Empresarial</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="container">
+
+        <!-- ==================== TELA 1: PAGINA INICIAL ==================== -->
+        <section id="screen-home" class="screen-section active">
+            <!-- Hero -->
+            <div class="hero-banner">
+                <div class="hero-content">
+                    <h1 class="hero-title">Informação confiável fortalece o comércio local.</h1>
+                    <p class="hero-subtitle">
+                        O VerificaLocal ajuda comunidades e pequenos negócios a lidarem com informações falsas ou sem contexto. Organização transparente de relatos, evidências e respostas públicas em momentos de crise.
+                    </p>
+                    <div class="hero-buttons">
+                        <button onclick="navigateTo('occurrences')" class="btn btn-primary">
+                            <span>Explorar Ocorrências</span>
+                            <svg class="svg-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </button>
+                        <button onclick="navigateTo('business')" class="btn btn-secondary">
+                            <span>Área Empresarial</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Três Benefícios -->
+            <div style="margin-bottom: 3rem;">
+                <div style="text-align: center; max-width: 600px; margin: 0 auto 2rem auto;">
+                    <h2>Como a plataforma apoia o seu bairro</h2>
+                    <p>Estrutura focada em fatos e contextualização pública sem tribunal da verdade.</p>
+                </div>
+
+                <div class="grid-3">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        </div>
+                        <h3>1. Identifique e acompanhe</h3>
+                        <p>Acompanhe rumores e boatos virais que circulam em grupos de mensagens locais antes que causem danos irrecuperáveis.</p>
+                    </div>
+
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        </div>
+                        <h3>2. Evidências transparentes</h3>
+                        <p>Consulte documentos, laudos técnicos e comprovantes anexados diretamente por moradores e comércios envolvidos.</p>
+                    </div>
+
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
+                        <h3>3. Resposta a crises digitais</h3>
+                        <p>Guia estruturado para pequenas empresas organizarem sua equipe e divulgarem notas oficiais com agilidade.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ocorrências Recentes -->
+            <div>
+                <div class="section-header">
+                    <div>
+                        <h2>Ocorrências Recentes</h2>
+                        <p>Relatos fictícios cadastrados na comunidade para demonstração</p>
+                    </div>
+                    <button onclick="navigateTo('occurrences')" class="btn btn-secondary btn-sm">Ver todas</button>
+                </div>
+
+                <div class="grid-3" id="home-cards-grid">
+                    <!-- Cards dinâmicos via JS -->
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="cta-banner">
+                <h2>Viu alguma informação duvidosa sobre um comércio?</h2>
+                <p style="max-width: 500px;">Ajude a trazer clareza para a comunidade registrando o relato e anexando capturas de tela.</p>
+                <button onclick="openModal()" class="btn btn-primary">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    <span>Registrar uma ocorrência agora</span>
+                </button>
+            </div>
+        </section>
+
+
+        <!-- ==================== TELA 2: LISTA DE OCORRENCIAS ==================== -->
+        <section id="screen-occurrences" class="screen-section">
+            <div class="section-header" style="align-items: center;">
+                <div>
+                    <h1>Ocorrências da Comunidade</h1>
+                    <p>Pesquise, filtre e acompanhe o esclarecimento de casos na sua região.</p>
+                </div>
+                <button onclick="openModal()" class="btn btn-primary btn-sm">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    <span>Registrar ocorrência</span>
+                </button>
+            </div>
+
+            <!-- Filtros e Busca -->
+            <div class="filter-box">
+                <div class="search-wrapper">
+                    <svg class="svg-icon search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" id="search-input" onkeyup="filterData()" placeholder="Buscar por empresa, assunto ou localização..." class="form-control">
+                </div>
+
+                <div class="filter-tags">
+                    <span style="font-size: 0.75rem; color: var(--text-secondary); margin-right: 0.5rem;">Status:</span>
+                    <button onclick="setFilter('todos')" id="filter-todos" class="filter-tag active">Todos</button>
+                    <button onclick="setFilter('analise')" id="filter-analise" class="filter-tag">Em análise</button>
+                    <button onclick="setFilter('publicado')" id="filter-publicado" class="filter-tag">Esclarecimento publicado</button>
+                    <button onclick="setFilter('resolvida')" id="filter-resolvida" class="filter-tag">Resolvida</button>
+                </div>
+            </div>
+
+            <!-- Grid de Cards -->
+            <div class="grid-3" id="occurrences-list-grid">
+                <!-- Renderizado via Javascript -->
+            </div>
+        </section>
+
+
+        <!-- ==================== TELA 3: DETALHES DA OCORRÊNCIA ==================== -->
+        <section id="screen-details" class="screen-section">
+            <div class="breadcrumb">
+                <button onclick="navigateTo('occurrences')">← Ocorrências</button>
+                <span>/</span>
+                <span style="color: var(--text-primary);">Detalhes do Caso</span>
+            </div>
+
+            <!-- Header do Detalhe -->
+            <div class="details-header-card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; max-width: 800px;">
+                        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                            <span class="badge badge-amber">
+                                <span style="width: 6px; height: 6px; border-radius: 50%; background-color: var(--status-amber);"></span>
+                                <span>Em análise</span>
+                            </span>
+                            <span style="font-size: 0.75rem; color: var(--text-secondary);">Categoria: Vigilância Sanitária</span>
+                            <span style="font-size: 0.75rem; color: var(--text-secondary);">• Registrado em 24/10/2026</span>
+                        </div>
+                        <h2>Mensagem sobre suposta contaminação circula em grupos locais</h2>
+                        <p style="color: var(--text-primary); font-weight: 600;">
+                            Empresa envolvida: <span style="color: var(--brand-accent);">Mercado Lima</span> (Centro)
+                        </p>
+                    </div>
+
+                    <button onclick="showToast('Link da ocorrência copiado!')" class="btn btn-secondary btn-sm">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                        <span>Compartilhar</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid de Conteúdo e Linha do Tempo -->
+            <div class="details-grid">
+                <!-- Coluna Esquerda: Informações Principais -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+                    <!-- Resumo -->
+                    <div style="background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem;">
+                        <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">Resumo do Relato</h3>
+                        <p style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md); font-size: 0.85rem;">
+                            "Áudio e imagens compartilhados em redes sociais e grupos de mensagens locais afirmam que um lote de pães de queijo e massas estaria contaminado. O conteúdo viralizou no início desta semana na região central."
+                        </p>
+                    </div>
+
+                    <!-- Evidências -->
+                    <div style="background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem;">
+                        <h3 style="margin-bottom: 0.85rem; font-size: 1rem;">Evidências Apresentadas</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.85rem;">
+                            <div class="evidence-item">
+                                <div style="width: 32px; height: 32px; background-color: var(--elevated); color: var(--brand-accent); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.7rem;">PNG</div>
+                                <div style="overflow: hidden;">
+                                    <div style="font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Print_Grupo_WhatsApp.png</div>
+                                    <span style="font-size: 0.68rem; color: var(--text-secondary);">Anexo da comunidade</span>
+                                </div>
+                            </div>
+                            <div class="evidence-item">
+                                <div style="width: 32px; height: 32px; background-color: rgba(34, 197, 94, 0.15); color: var(--status-green); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.7rem;">PDF</div>
+                                <div style="overflow: hidden;">
+                                    <div style="font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Laudo_Vigilancia_Out2026.pdf</div>
+                                    <span style="font-size: 0.68rem; color: var(--text-secondary);">Documento oficial</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card IA Preliminar (TEXTO EXATO SOLICITADO) -->
+                    <div class="ai-card">
+                        <div class="ai-icon-box">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 12 2.1 12.1"/><path d="M12 12l7.1-7.1"/></svg>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 0.85rem; margin-bottom: 0.35rem; color: var(--brand-light);">Análise preliminar por IA</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-primary); line-height: 1.5;">
+                                Existem informações que precisam de confirmação. Os materiais enviados ainda não são suficientes para estabelecer uma conclusão definitiva.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Posicionamento da Empresa -->
+                    <div style="background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+                            <h3 style="font-size: 1rem;">Posicionamento da Empresa</h3>
+                            <span class="badge badge-green">Esclarecimento Enviado</span>
+                        </div>
+                        <div style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); padding: 1.25rem; border-radius: var(--radius-md);">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <div style="width: 24px; height: 24px; background-color: var(--brand-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: bold;">PB</div>
+                                <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary);">Padaria Ponto do Bairro</span>
+                                <span style="font-size: 0.7rem; color: var(--text-secondary);">— 25/10/2026 às 14:30</span>
+                            </div>
+                            <p style="font-size: 0.825rem; color: var(--text-primary);">
+                                "Informamos aos nossos clientes que todas as normas da Vigilância Sanitária estão rigorosamente em dia. Apresentamos o laudo de vistoria realizado este mês comprovando a qualidade total de nossos produtos. Estamos à disposição para qualquer esclarecimento."
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Coluna Direita: Linha do Tempo e Ações -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <!-- Linha do Tempo -->
+                    <div style="background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem;">
+                        <h3 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.25rem; color: var(--text-secondary);">Linha do Tempo</h3>
+
+                        <div class="timeline">
+                            <div class="timeline-step">
+                                <div class="timeline-dot"></div>
+                                <div style="font-size: 0.8rem; font-weight: 700;">Relato Registrado</div>
+                                <div style="font-size: 0.7rem; color: var(--text-secondary);">24/10/2026 por morador da região</div>
+                            </div>
+                            <div class="timeline-step">
+                                <div class="timeline-dot"></div>
+                                <div style="font-size: 0.8rem; font-weight: 700;">Evidências Anexadas</div>
+                                <div style="font-size: 0.7rem; color: var(--text-secondary);">24/10/2026 - Prints adicionados</div>
+                            </div>
+                            <div class="timeline-step">
+                                <div class="timeline-dot success"></div>
+                                <div style="font-size: 0.8rem; font-weight: 700;">Esclarecimento Publicado</div>
+                                <div style="font-size: 0.7rem; color: var(--text-secondary);">25/10/2026 - Resposta da padaria</div>
+                            </div>
+                            <div class="timeline-step">
+                                <div class="timeline-dot active"></div>
+                                <div style="font-size: 0.8rem; font-weight: 700; color: var(--status-amber);">Análise Preliminar</div>
+                                <div style="font-size: 0.7rem; color: var(--text-secondary);">Em acompanhamento público</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botão de Ação -->
+                    <div style="background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                        <h4 style="font-size: 0.85rem;">Possui mais dados?</h4>
+                        <p style="font-size: 0.75rem;">Você pode enviar evidências adicionais para ajudar a enriquecer o contexto deste relato.</p>
+                        <button onclick="openModal()" class="btn btn-secondary btn-sm" style="width: 100%;">
+                            <span>Enviar informação adicional</span>
+                        </button>
+                    </div>
+
+                    <!-- Atalho para Empresa -->
+                    <div style="background-color: var(--elevated); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                        <span style="font-size: 0.75rem; color: var(--brand-light); font-weight: 600;">É o responsável por esta empresa?</span>
+                        <p style="font-size: 0.75rem;">Acesse o painel empresarial para gerenciar seu plano de resposta.</p>
+                        <button onclick="navigateTo('business')" class="btn btn-primary btn-sm" style="width: 100%;">
+                            <span>Acessar Painel Empresarial</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==================== TELA 4: PAINEL EMPRESARIAL ==================== -->
+        <section id="screen-business" class="screen-section">
+            <div class="dashboard-header">
+                <div>
+                    <span style="font-size: 0.75rem; color: var(--brand-light); font-weight: 600;">Painel de Gestão de Crise</span>
+                    <h1 style="font-size: 1.5rem; margin-top: 0.25rem;">Olá, Padaria Ponto do Bairro!</h1>
+                    <p>Vamos acompanhar e organizar a reputação do seu negócio.</p>
+                </div>
+                <button onclick="navigateTo('details')" class="btn btn-secondary btn-sm">
+                    <span>Ver ocorrência na comunidade</span>
+                </button>
+            </div>
+
+            <!-- Resumo / Métricas -->
+            <div class="grid-3" style="margin-bottom: 1.5rem;">
+                <div class="kpi-card">
+                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Ocorrências Abertas</span>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <span class="kpi-value" style="color: var(--status-amber);">1</span>
+                        <span class="badge badge-amber">Requer atenção</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Esclarecimentos Publicados</span>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <span class="kpi-value" style="color: var(--status-green);">2</span>
+                        <span class="badge badge-green">Ativos</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Tarefas do Plano Pendentes</span>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <span class="kpi-value" style="color: var(--brand-accent);">1</span>
+                        <span class="badge badge-blue">Etapa 3 de 3</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details-grid">
+                <!-- Coluna Principal -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+                    <!-- Alerta de Crise -->
+                    <div class="alert-banner">
+                        <svg class="svg-icon" style="color: var(--status-amber); flex-shrink:0;" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <div>
+                            <h4 style="font-size: 0.85rem; color: var(--text-primary);">Ocorrência em Análise Detectada</h4>
+                            <p style="font-size: 0.75rem; color: var(--text-secondary);">
+                                "Mensagem sobre suposta contaminação circula em grupos locais." Recomendamos seguir o plano de resposta abaixo.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Plano de Resposta à Crise -->
+                    <div style="background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3>Plano de Resposta à Crise</h3>
+                                <p style="font-size: 0.75rem;">Siga os passos recomendados para contornar o boato com segurança</p>
+                            </div>
+                            <span id="progress-percent" style="font-size: 0.8rem; font-weight: 700; color: var(--brand-accent);">66% Concluído</span>
+                        </div>
+
+                        <!-- Barra de Progresso -->
+                        <div class="progress-bar-bg">
+                            <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                        </div>
+
+                        <!-- Tarefas -->
+                        <div class="task-list">
+                            <label class="task-item">
+                                <input type="checkbox" checked onchange="updateTaskProgress()" class="task-checkbox">
+                                <div>
+                                    <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); display: block;">1. Reunir documentos e evidências</span>
+                                    <span style="font-size: 0.725rem; color: var(--text-secondary);">Organize laudos recentes, notas fiscais ou inspeções de qualidade.</span>
+                                </div>
+                            </label>
+
+                            <label class="task-item">
+                                <input type="checkbox" checked onchange="updateTaskProgress()" class="task-checkbox">
+                                <div>
+                                    <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); display: block;">2. Revisar as informações com a equipe</span>
+                                    <span style="font-size: 0.725rem; color: var(--text-secondary);">Oriente os atendentes do balcão sobre como prestar informações corretas.</span>
+                                </div>
+                            </label>
+
+                            <label class="task-item">
+                                <input type="checkbox" onchange="updateTaskProgress()" class="task-checkbox">
+                                <div>
+                                    <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); display: block;">3. Publicar um esclarecimento transparente</span>
+                                    <span style="font-size: 0.725rem; color: var(--text-secondary);">Divulgue o comunicado oficial abaixo para contextualizar a comunidade.</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Editor de Comunicado -->
+                    <div style="background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3>Rascunho de Comunicado Público</h3>
+                            <span style="font-size: 0.7rem; color: var(--text-secondary);">Edição inline</span>
+                        </div>
+
+                        <textarea id="statement-editor" class="editor-textarea">Informamos aos nossos clientes e moradores do bairro que a Padaria Ponto do Bairro mantém controle rigoroso de qualidade em todos os seus processos. Disponibilizamos integralmente o laudo de inspeção da Vigilância Sanitária realizado este mês. Agradecemos a confiança de todos e continuamos à disposição para dúvidas.</textarea>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                            <button onclick="copyStatement()" class="btn btn-secondary btn-sm">
+                                <svg class="svg-icon" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                                <span>Copiar texto</span>
+                            </button>
+
+                            <button onclick="publishStatement()" class="btn btn-success btn-sm">
+                                <span>Publicar Esclarecimento</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Coluna Direita: Recomendações -->
+                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                    <div style="background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem;">
+                        <h4 style="font-size: 0.85rem; margin-bottom: 0.85rem;">Orientações para Pequenos Negócios</h4>
+                        <ul style="font-size: 0.75rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.75rem; padding-left: 1rem;">
+                            <li>Mantenha um tom profissional, calmo e transparente.</li>
+                            <li>Apresente provas concretas (fotos, laudos, documentos).</li>
+                            <li>Evite confrontos diretos ou acusações sem embasamento.</li>
+                            <li>Centralize o posicionamento para evitar ruídos de comunicação.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div>
+                <strong style="color: var(--text-primary);">VerificaLocal</strong> — Protótipo navegável para apresentação em Ideiathon
+            </div>
+            <div>Dados fictícios simulados para avaliação técnica e visual.</div>
+        </div>
+    </footer>
+
+    <!-- MODAL: REGISTRAR OCORRÊNCIA -->
+    <div id="modal-register" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 style="font-size: 1.1rem;">Registrar Ocorrência na Comunidade</h3>
+                <button onclick="closeModal()" class="modal-close">✕</button>
+            </div>
+
+            <form onsubmit="handleFormSubmit(event)" style="display: flex; flex-direction: column; gap: 1rem;">
+                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                    <label style="font-size: 0.75rem; color: var(--text-secondary);">Nome do Estabelecimento / Empresa</label>
+                    <input type="text" id="modal-company" required placeholder="Ex: Farmácia do Bairro" class="form-control" style="padding-left: 0.85rem;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
+                    <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                        <label style="font-size: 0.75rem; color: var(--text-secondary);">Categoria</label>
+                        <select id="modal-category" class="form-control" style="padding-left: 0.85rem;">
+                            <option>Vigilância Sanitária</option>
+                            <option>Atendimento / Serviço</option>
+                            <option>Preços / Promoções</option>
+                            <option>Outros</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                        <label style="font-size: 0.75rem; color: var(--text-secondary);">Localização / Bairro</label>
+                        <input type="text" id="modal-location" required placeholder="Ex: Centro" class="form-control" style="padding-left: 0.85rem;">
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                    <label style="font-size: 0.75rem; color: var(--text-secondary);">Título do Relato / Boato</label>
+                    <input type="text" id="modal-title" required placeholder="Ex: Publicação questiona a procedência dos produtos" class="form-control" style="padding-left: 0.85rem;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                    <label style="font-size: 0.75rem; color: var(--text-secondary);">Descrição do Ocorrido</label>
+                    <textarea id="modal-desc" rows="3" required placeholder="Descreva brevemente o relato ou mensagem viral..." class="editor-textarea" style="min-height: 80px;"></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem;">
+                    <button type="button" onclick="closeModal()" class="btn btn-secondary btn-sm">Cancelar</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Registrar Ocorrência</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST DE NOTIFICAÇÃO -->
+    <div id="toast" class="toast">
+        <svg class="svg-icon" style="color: var(--status-green);" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span id="toast-text" style="font-size: 0.8rem; font-weight: 600;">Operação realizada!</span>
+    </div>
+
+    <!-- JAVASCRIPT NATIVO -->
+    <script>
+        // Dados Fictícios Iniciais
+        let occurrencesData = [
+            {
+                id: 'padaria-ponto',
+                title: 'Mensagem sobre suposta contaminação circula em grupos locais',
+                company: 'Padaria Ponto do Bairro',
+                location: 'Centro',
+                category: 'Vigilância Sanitária',
+                date: '24/10/2026',
+                status: 'analise',
+                statusLabel: 'Em análise',
+                badgeClass: 'badge-amber',
+                description: 'Áudio e prints apontando suposta irregularidade no lote de produtos comercializados.'
+            },
+            {
+                id: 'farmacia-vida',
+                title: 'Publicação questiona o funcionamento e horário da loja',
+                company: 'Farmácia Vida Nova',
+                location: 'Bairro das Flores',
+                category: 'Atendimento / Serviço',
+                date: '22/10/2026',
+                status: 'publicado',
+                statusLabel: 'Esclarecimento publicado',
+                badgeClass: 'badge-blue',
+                description: 'Postagem em rede social alegava fechamento fora do horário oficial de atendimento.'
+            },
+            {
+                id: 'mercado-uniao',
+                title: 'Empresa publica esclarecimento sobre informação viralizada de preços',
+                company: 'Supermercado União',
+                location: 'Zona Sul',
+                category: 'Preços / Promoções',
+                date: '19/10/2026',
+                status: 'resolvida',
+                statusLabel: 'Resolvida',
+                badgeClass: 'badge-green',
+                description: 'Imagem adulterada de encarte circulou informando alteração falsa em preços de cestas básicas.'
+            }
+        ];
+
+        let currentFilter = 'todos';
+
+        // Navegação SPA
+        function navigateTo(screenId) {
+            const screens = ['home', 'occurrences', 'details', 'business'];
+            screens.forEach(id => {
+                const el = document.getElementById(`screen-${id}`);
+                if (el) el.classList.remove('active');
+            });
+
+            const target = document.getElementById(`screen-${screenId}`);
+            if (target) target.classList.add('active');
+
+            // Atualiza botões do menu
+            ['home', 'occurrences', 'business'].forEach(navId => {
+                const btn = document.getElementById(`nav-${navId}`);
+                if (btn) {
+                    if (navId === screenId) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                }
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Renderização dos Cards
+        function renderOccurrences() {
+            const listGrid = document.getElementById('occurrences-list-grid');
+            const homeGrid = document.getElementById('home-cards-grid');
+            const searchVal = (document.getElementById('search-input')?.value || '').toLowerCase();
+
+            const filtered = occurrencesData.filter(item => {
+                const matchSearch = item.title.toLowerCase().includes(searchVal) ||
+                                    item.company.toLowerCase().includes(searchVal) ||
+                                    item.location.toLowerCase().includes(searchVal);
+                const matchStatus = currentFilter === 'todos' || item.status === currentFilter;
+                return matchSearch && matchStatus;
+            });
+
+            const createCardHTML = (item) => `
+                <div class="occurrence-card">
+                    <div>
+                        <div class="occurrence-header">
+                            <span class="badge ${item.badgeClass}">${item.statusLabel}</span>
+                            <span style="font-size: 0.7rem; color: var(--text-secondary);">${item.date}</span>
+                        </div>
+                        <h3 style="font-size: 0.95rem; margin: 0.75rem 0 0.5rem 0;">${item.title}</h3>
+                        <p style="font-size: 0.8rem; margin-bottom: 0.75rem;">${item.description}</p>
+                        <div style="font-size: 0.75rem; color: var(--text-primary); font-weight: 600;">
+                            ${item.company} <span style="color: var(--text-secondary); font-weight: normal;">• ${item.location}</span>
+                        </div>
+                    </div>
+                    <div class="occurrence-footer">
+                        <span style="font-size: 0.7rem; color: var(--text-secondary);">${item.category}</span>
+                        <button onclick="navigateTo('details')" class="btn btn-secondary btn-sm" style="padding: 0.25rem 0.6rem;">
+                            <span>Ver detalhes</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            if (listGrid) {
+                listGrid.innerHTML = filtered.map(createCardHTML).join('');
+            }
+
+            if (homeGrid) {
+                homeGrid.innerHTML = occurrencesData.slice(0, 3).map(createCardHTML).join('');
+            }
+        }
+
+        // Filtros
+        function setFilter(status) {
+            currentFilter = status;
+            ['todos', 'analise', 'publicado', 'resolvida'].forEach(st => {
+                const btn = document.getElementById(`filter-${st}`);
+                if (btn) {
+                    if (st === status) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                }
+            });
+            renderOccurrences();
+        }
+
+        function filterData() {
+            renderOccurrences();
+        }
+
+        // Modal Controls
+        function openModal() {
+            document.getElementById('modal-register').classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-register').classList.remove('open');
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const newCompany = document.getElementById('modal-company').value;
+            const newCategory = document.getElementById('modal-category').value;
+            const newLocation = document.getElementById('modal-location').value;
+            const newTitle = document.getElementById('modal-title').value;
+            const newDesc = document.getElementById('modal-desc').value;
+
+            const newOccurrence = {
+                id: 'occ-' + Date.now(),
+                title: newTitle,
+                company: newCompany,
+                location: newLocation,
+                category: newCategory,
+                date: 'Hoje',
+                status: 'analise',
+                statusLabel: 'Em análise',
+                badgeClass: 'badge-amber',
+                description: newDesc
+            };
+
+            occurrencesData.unshift(newOccurrence);
+            renderOccurrences();
+            closeModal();
+            showToast('Nova ocorrência registrada com sucesso!');
+            
+            // Limpar formulário
+            e.target.reset();
+        }
+
+        // Atualização Dinâmica do Checklist Empresarial
+        function updateTaskProgress() {
+            const checkboxes = document.querySelectorAll('#screen-business input[type="checkbox"]');
+            let checked = 0;
+            checkboxes.forEach(cb => { if (cb.checked) checked++; });
+
+            const percentage = Math.round((checked / checkboxes.length) * 100);
+            
+            document.getElementById('progress-bar-fill').style.width = percentage + '%';
+            document.getElementById('progress-percent').innerText = percentage + '% Concluído';
+        }
+
+        // Ações de texto
+        function copyStatement() {
+            const txt = document.getElementById('statement-editor').value;
+            navigator.clipboard.writeText(txt);
+            showToast('Texto copiado para a área de transferência!');
+        }
+
+        function publishStatement() {
+            showToast('Esclarecimento publicado na página da ocorrência!');
+            setTimeout(() => {
+                navigateTo('details');
+            }, 800);
+        }
+
+        // Feedback Toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Inicialização
+        window.onload = function() {
+            renderOccurrences();
+        };
+    </script>
+</body>
+</html>
